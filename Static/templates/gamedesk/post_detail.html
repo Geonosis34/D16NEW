@@ -1,0 +1,25 @@
+{% extends 'default.html' %}
+{% block title %}
+Detail
+{% endblock title %}
+
+{% block content %}
+<h2><u>Detail</u></h2>
+<p><h3>{{ post_detail.title }}</h3></p>
+<p><u>{{ post_detail.dateCreation|date:'d-m-Y H:i' }}</u></p>
+<p>{{ post_detail.text }}</p>
+<p>{{ post_detail.author }}</p>
+<p>{{ post_detail.category }}</p>
+<hr>
+<p><h6> Комментарии:</h6>{{ post.comment_set.all }}</p>
+<div class="card-footer">
+<hr>
+<a href="{% url 'post_update' post_detail.id %}"><u> Редактировать статью</u><a/>
+<hr>
+<a href="{% url 'post_delete' post_detail.id %}"><u> Удалить статью</u><a/>
+<hr>
+    <a href="{% url 'comment_create' post_detail.id %}"><u> Оставить комментарий</u><a/>
+        <hr>
+    <a href="{% url 'comment_list' post_detail.id %}"><u> Все комментарии к статье</u><a/>
+</div>
+{% endblock content %}
