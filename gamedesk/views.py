@@ -1,21 +1,23 @@
 from django.shortcuts import render, redirect
-
-from .models import *
 from django.views.generic import *
-from .forms import *
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
-#from .utils.permissions import IsAuthorMixin, NotIsAuthorMixin
-from django.contrib import messages
+
+from .forms import *
+
+from .utils.permissions import IsAuthorMixin, NotIsAuthorMixin
+
 
 class PostList(ListView):
     model = Post
     context_object_name = 'post_list'
     queryset = Post.objects.order_by('-dateCreation')
 
+
 class PostDetail(DetailView):
     model = Post
     context_object_name = 'post_detail'
     template_name = 'gamedesk/post_detail.html'
+
 
 class PostCreate(LoginRequiredMixin, CreateView):
     template_name = 'gamedesk/post_create.html'
@@ -27,7 +29,8 @@ class PostCreate(LoginRequiredMixin, CreateView):
     def get_absolute_url(self):
         return reverse('post_list', args=[str(self.id)])
 
-class PostUpdate(LoginRequiredMixin, UpdateView):
+
+class PostUpdate(IsAuthorMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'gamedesk/post_create.html'
@@ -38,6 +41,7 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
         id = self.kwargs.get('pk')
         return Post.objects.get(pk=id)
 
+
 class PostDelete(LoginRequiredMixin, DeleteView):
     model = Post
     template_name = 'gamedesk/post_delete.html'
@@ -45,7 +49,8 @@ class PostDelete(LoginRequiredMixin, DeleteView):
     queryset = Post.objects.all()
     permission_required = ('post.post_delete',)
 
-class CommentList(LoginRequiredMixin, View):
+
+class CommentList(IsAuthorMixin, View):
     def get(self, request, *args, **kwargs):
         post_pk = kwargs['post_pk']
         post = Post.objects.get(pk=post_pk)
@@ -59,7 +64,7 @@ class CommentList(LoginRequiredMixin, View):
         return render(request, 'gamedesk/comment_list.html', context)
 
 
-class CommentCreate(LoginRequiredMixin, View):
+class CommentCreate(NotIsAuthorMixin, View):
     def get(self, request, **kwargs):
         form = CommentCreateForm(request.POST or None)
         post = Post.objects.get(pk=kwargs['post_pk'])
@@ -84,6 +89,7 @@ class CommentCreate(LoginRequiredMixin, View):
 
         return redirect('/gamedesk/')
 
+
 class CommentDelete(LoginRequiredMixin, DeleteView):
     model = Comment
     template_name = 'gamedesk/comment_delete.html'
@@ -96,7 +102,8 @@ class CommentDelete(LoginRequiredMixin, DeleteView):
         comment = Comment.objects.get(pk=comment_id)
         return comment
 
-class CommentAccept(LoginRequiredMixin, View):
+
+class CommentAccept(IsAuthorMixin, View):
     def get(self, request, *args, **kwargs):
         comment_pk = kwargs['comment_pk']
 
@@ -107,7 +114,7 @@ class CommentAccept(LoginRequiredMixin, View):
         return redirect(request.META['HTTP_REFERER'])
 
 
-class CommentReject(LoginRequiredMixin, View):
+class CommentReject(IsAuthorMixin, View):
     def get(self, request, *args, **kwargs):
         comment_pk = kwargs['comment_pk']
 
@@ -116,6 +123,7 @@ class CommentReject(LoginRequiredMixin, View):
         comment.save()
 
         return redirect(request.META['HTTP_REFERER'])
+
 
 class ByAuthorView(ListView):
     def get(self, request, *args, **kwargs):
@@ -128,5 +136,3 @@ class ByAuthorView(ListView):
       }
 
       return render(request, 'by_author.html', context)
-
-

@@ -1,12 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+from ckeditor_uploader.fields import RichTextUploadingField
+
+User = get_user_model()
 
 
 class Post(models.Model):
     title = models.CharField('Title', max_length=100)
-    text = models.TextField()
+    text = RichTextUploadingField('Text')
     category = models.ForeignKey(to='Category', on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, null=True, default=1, on_delete=models.CASCADE, verbose_name='Author')
     dateCreation = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -54,7 +58,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.author} - {self.dateCreation}'
-
 
     class Meta:
         verbose_name = 'Комментарий'
